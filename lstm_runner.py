@@ -7,7 +7,7 @@ import torch
 import os
 import numpy as np
 import matplotlib.pyplot as plt
-
+import logging
 
 class Lstm_Runner:
     def __init__(self, args, env):
@@ -23,11 +23,13 @@ class Lstm_Runner:
         self.device = torch.device('cuda' if torch.cuda.is_available else 'cpu')
         self.save_path = self.args.save_dir + '/' + self.args.scenario_name+'/share_param='+str(self.args.share_param)
         self.result_path=self.save_path + '/'+self.args.algorithm+'/'+self.args.run_id
-
+        self.best_return = -99999
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         if not os.path.exists(self.result_path):
             os.makedirs(self.result_path)
+        logging.basicConfig(filename=f'{self.result_path}/{self.args.scenario_name}_{self.args.algorithm}_{self.args.run_id}.txt', level=logging.INFO, format='%(asctime)s - %(message)s')
+        logging.info(f'{args}')
 
     def _init_agents(self):
         agents = []
@@ -112,15 +114,21 @@ class Lstm_Runner:
                 return_for_this_round=self.evaluate()
                 print("Avg_return for this round is",return_for_this_round)
                 returns.append(return_for_this_round)
-                
+                logging.info(f"Time step: {time_step} Return: {return_for_this_round}")
                 plt.figure()
                 plt.plot(range(len(returns)), returns)
                 plt.xlabel('episode * ' + str(self.args.evaluate_rate / self.episode_limit))
                 plt.ylabel('average returns')
                 plt.savefig(self.result_path+'/plt.png', format='png')
+                plt.close()
                 self.noise = max(0.05, self.noise - 0.0000005)
                 self.epsilon = max(0.05, self.epsilon - 0.0000005)
-                np.save(self.result_path+'/returns.pkl', returns)
+                if time_step % 10000 == 0:
+                    np.save(self.result_path+ f'/{time_step}_returns.pkl', returns)
+                    if return_for_this_round > self.best_return:
+                        np.save(self.result_path + f'/best_returns.pkl', returns)
+                        self.best_return = return_for_this_round
+
 
     def evaluate(self):
         returns = []
@@ -145,7 +153,7 @@ class Lstm_Runner:
                                                                 dtype=torch.float32, device=device)
 
             for time_step in range(self.args.evaluate_episode_len):
-                self.env.render()
+                # self.env.render() #关闭渲染窗口
                 actions = []
                 u=[]
                 with torch.no_grad():

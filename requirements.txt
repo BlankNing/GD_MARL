@@ -1,8 +1,8 @@
-tqdm
-torch
-torchvision
-torchaudio
-matplotlib
+gym==0.26.2
+matplotlib==3.8.2
+numpy==1.26.2
 pyglet==1.5.11
-piglet
-freeglut3-dev
+setuptools==68.2.2
+six==1.16.0
+torch==1.11.0
+tqdm==4.66.1

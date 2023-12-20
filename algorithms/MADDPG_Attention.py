@@ -1,23 +1,20 @@
 import torch
 import os
-from modules.agents.lstm_agent import Actor as LSTMActor
-from modules.critics.lstm_critic import Critic
+from modules.agents.attention_agent import Actor as AttentionActor
+from modules.critics.attention_critic import Critic
 
-
-
-
-class MADDPG_lstm:
+class MADDPG_Attention:
     def __init__(self, args, agent_id):  # 因为不同的agent的obs、act维度可能不一样，所以神经网络不同,需要agent_id来区分
         self.args = args
         self.agent_id = agent_id
         self.train_step = 0
 
         # create the network
-        self.actor_network = LSTMActor(args, agent_id)
+        self.actor_network = AttentionActor(args, agent_id)
         self.critic_network = Critic(args)
 
         # build up the target network
-        self.actor_target_network = LSTMActor(args, agent_id)
+        self.actor_target_network = AttentionActor(args, agent_id)
         self.critic_target_network = Critic(args)
 
         # load the weights into the target networks
@@ -39,6 +36,10 @@ class MADDPG_lstm:
         if not os.path.exists(self.model_path):
             os.mkdir(self.model_path)
         self.model_path = self.model_path + '/' + self.args.algorithm
+        if not os.path.exists(self.model_path):
+            os.mkdir(self.model_path)
+        # each run_id each file
+        self.model_path = self.model_path + '/' + self.args.run_id
         if not os.path.exists(self.model_path):
             os.mkdir(self.model_path)
         self.model_path = self.model_path + '/' + 'agent_%d' % agent_id

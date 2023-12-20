@@ -6,6 +6,7 @@ import torch
 import os
 import numpy as np
 import matplotlib.pyplot as plt
+import logging
 
 
 class Runner:
@@ -22,12 +23,14 @@ class Runner:
         self.agents = self._init_agents()
         self.device=torch.device('cuda' if torch.cuda.is_available else 'cpu')
         self.buffer = Buffer(args)
+        self.best_return = -99999
         self.save_path = self.args.save_dir + '/' + self.args.scenario_name+'/share_param='+str(self.args.share_param)
         self.result_path=self.save_path + '/'+self.args.algorithm+'/'+self.args.run_id
         if not os.path.exists(self.save_path):
             os.makedirs(self.save_path)
         if not os.path.exists(self.result_path):
             os.makedirs(self.result_path)
+        logging.basicConfig(filename=f'{self.args.scenario_name}_{self.args.algorithm}_{self.args.run_id}.txt')
 
     def _init_agents(self):
         agents = []
@@ -64,8 +67,7 @@ class Runner:
             
             for i in range(self.args.n_agents, self.args.n_players):
                 actions.append(torch.tensor([0, np.random.rand() * 2 - 1, 0, np.random.rand() * 2 - 1, 0],device=self.device))# for the adversial 
-            
-            
+
             s_next, r, done, info = self.env.step(actions)
             self.buffer.store_episode(s[:self.args.n_agents], u, r[:self.args.n_agents], s_next[:self.args.n_agents])
             s = s_next
@@ -113,7 +115,10 @@ class Runner:
                 plt.savefig(self.result_path+'/plt.png', format='png')
                 self.noise = max(0.05, self.noise - 0.0000005)
                 self.epsilon = max(0.05, self.epsilon - 0.0000005)
-                np.save(self.result_path+ '/returns.pkl', returns)
+                np.save(self.result_path+ f'/{time_step}_returns.pkl', returns)
+                if return_for_this_round > self.best_return:
+                    np.save(self.result_path + f'/{time_step}_best_returns.pkl', returns)
+
 
     def evaluate(self):
         returns = []
