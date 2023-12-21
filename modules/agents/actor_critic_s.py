@@ -32,16 +32,17 @@ class Critic(nn.Module):
         self.q_out = nn.Linear(64, 1)#output q score of certain action under certain observation
 
     def forward(self, state, action):
-
         state = torch.cat(state, dim=1)
         #print(state.shape)
         for i in range(len(action)):
             action[i] /= self.max_action
-
         action = torch.cat(action, dim=1)
         x = torch.cat([state, action], dim=1)
+        # print('attention_x,s,a',x.shape,state.shape,action.shape) # [16,78] [16,48] [16,30]? fixed!
+        # print('lstm_x,s,a',x.shape,state.shape,action.shape) # [16,63] [16,48] [16,15]
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         q_value = self.q_out(x)
+        # print(q_value.shape) #[16,1]
         return q_value

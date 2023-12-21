@@ -29,11 +29,15 @@ class Actor(nn.Module):
         self.action_out = nn.Linear(64, args.action_shape[agent_id])
 
 
-    def forward(self, x): #input shape[batch_size,seq_length,obs_shape] [1,16]
+    def forward(self, x): #input shape[batch_size,seq_length,obs_shape] [16,5,16]
         attened_state=self.attention(x)
+        # print(attened_state.shape) #[1,5,16] [16,5,16] not as competitive as lstm 1,5,64 16,5,64
         x = F.relu(self.fc1(attened_state))
         x = F.relu(self.fc2(x))
         actions = self.max_action * torch.tanh(self.action_out(x))
+        # print('attention_action',actions.shape) [16,5,5]
         if len(actions.shape)==3:
             actions=actions[:,-1,:]
+        # print('attention_actions',actions.shape) [16,5]
+
         return actions

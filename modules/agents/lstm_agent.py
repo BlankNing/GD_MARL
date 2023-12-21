@@ -15,7 +15,7 @@ class Actor(nn.Module):
         # self.h=None
         # self.c=None
 
-    def forward(self, x):#input shape[batch_size,seq_length,obs_shape]
+    def forward(self, x):#input shape[batch_size,seq_length,obs_shape] [16,5,16]
         # if type(self.h)==None :
         #     seq,a=self.lstm(x,[self.h,self.c])#[batch_size,seq_length,rnn_hidden_dim]
         #     self.h=a[0]
@@ -25,11 +25,13 @@ class Actor(nn.Module):
         #     self.h=a[0]
         #     self.c=a[1]
         seq,a=self.lstm(x)
+        # print('seq',seq.shape) #[16,5,64] [1,5,64]
         x = F.relu(self.fc1(seq))
         x = F.relu(self.fc2(x))
         #x = F.relu(self.fc3(x))
         actions = self.max_action * torch.tanh(self.action_out(x))
+        # print('lstm_action:',actions.shape) [16,5,5]
         if len(actions.shape)==3:
             actions=actions[:,-1,:]
-
+        # print('lstm_actions:',actions.shape) [16,5]
         return actions

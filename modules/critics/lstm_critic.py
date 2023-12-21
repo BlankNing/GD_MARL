@@ -19,9 +19,12 @@ class Critic(nn.Module):
             action[i] /= self.max_action
         action = torch.cat(action, dim=-1)
         x = torch.cat([state, action], dim=-1)
+        # print('lstm_x,s,a',x.shape,state.shape,action.shape) # [16,5,63] [16,5,48] [16,5,15]
         x,_=self.lstm(x)
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
+        # print('lstm_x,s,a',x.shape,state.shape,action.shape) # [16,5,64] [16,5,48] [16,5,15]
 
         q_value = self.q_out(x)[:,-1,:]
+        # print(q_value.shape) [16,1]
         return q_value

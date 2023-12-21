@@ -34,10 +34,12 @@ class Critic(nn.Module):
             action[i] /= self.max_action
         action = torch.cat(action, dim=-1)
         x = torch.cat([state, action], dim=-1)
-
+        # print('attention_critic(s,a,x)',state.shape,action.shape,x.shape) #[16,5,48] [16,5,15] [16,5,63]
         attended_input=self.attention(x)
         x = F.relu(self.fc1(attended_input))
         x = F.relu(self.fc2(x))
+        # print('attention_critic(s,a,x)',state.shape,action.shape,x.shape) [16,5,48] [16,5,15] [16,5,64]
 
         q_value = self.q_out(x)[:,-1,:]
+        # print('att_q',q_value.shape) [16,1]
         return q_value

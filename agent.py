@@ -11,6 +11,7 @@ from algorithms.FACLSTM import FACLSTM
 from algorithms.MADDPGLSTM import MADDPG_lstm as MADDPGLSTM
 from algorithms.MADDPG_Trans import MADDPGTrans as MADDPGTrans
 from algorithms.MADDPG_Attention import MADDPG_Attention as MADDPGAttenion
+from algorithms.MADDPG_Attention_actor import MADDPG_Attention as MADDPGAttention_actor
 
 
 class Agent:
@@ -28,7 +29,9 @@ class Agent:
             "MADDPGLSTM":{"policy":MADDPGLSTM(args,agent_id), "sep_action":False,"time_series":True},           
             "MADDPGTrans":{"policy":MADDPGTrans(args,agent_id), "sep_action":False,"time_series":True},
             # add maddpg_attention
-            "MADDPGATTENTION":{"policy":MADDPGAttenion(args,agent_id), "sep_action":False,"time_series":True}
+            "MADDPGATTENTION":{"policy":MADDPGAttenion(args,agent_id), "sep_action":False, "time_series":True},
+            "MADDPGATTENTIONactor": {"policy": MADDPGAttention_actor(args, agent_id), "sep_action": False, "time_series": True}
+
         }
         
         self.policy=self.policy_class[policy_name]["policy"]
